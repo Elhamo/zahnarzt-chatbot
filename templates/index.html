@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dr. Christian Schreiner - Zahnarztpraxis</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Landing Page Background -->
+    <div class="landing-page">
+        <div class="landing-content">
+            <div class="landing-logo">
+                <i class="fas fa-tooth"></i>
+            </div>
+            <h1>Dr. Christian Schreiner</h1>
+            <p>Zahnarztpraxis · 1010 Wien</p>
+            <span class="landing-hint">
+                <i class="fas fa-arrow-down"></i> Klicken Sie auf den Chat-Button rechts unten
+            </span>
+        </div>
+    </div>
+
+    <!-- Chat Bubble Button -->
+    <div class="chat-bubble" id="chatBubble" onclick="toggleChat()">
+        <div class="bubble-icon" id="bubbleIcon">
+            <i class="fas fa-comments"></i>
+        </div>
+        <div class="bubble-pulse"></div>
+        <div class="bubble-badge" id="bubbleBadge">1</div>
+    </div>
+
+    <!-- Chat Widget -->
+    <div class="chat-widget" id="chatWidget">
+        <div class="widget-header">
+            <div class="widget-header-left">
+                <div class="widget-avatar">
+                    <i class="fas fa-tooth"></i>
+                    <span class="online-dot"></span>
+                </div>
+                <div class="widget-header-info">
+                    <h2>Dr. Christian Schreiner</h2>
+                    <p><span class="status-dot"></span> Online · Zahnarztpraxis Wien</p>
+                </div>
+            </div>
+            <div class="widget-header-actions">
+                <button class="header-btn" onclick="resetChat()" title="Neuer Chat">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button class="header-btn" onclick="toggleChat()" title="Minimieren">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="widget-messages" id="chatMessages">
+            <!-- Messages inserted here -->
+        </div>
+
+        <div class="widget-input" id="chatInputArea">
+            <div class="input-wrapper">
+                <input type="text" id="userInput" placeholder="Schreiben Sie Ihre Nachricht..." autocomplete="off">
+                <button id="sendBtn" onclick="sendUserInput()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            <div class="input-footer">
+                <span>Powered by KI-Assistent</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar Modal -->
+    <div class="modal-overlay" id="calendarModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Termin wählen</h2>
+                <button class="modal-close" onclick="closeCalendar()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="calendar-container">
+                <div class="calendar-nav">
+                    <button onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                    <span id="calendarMonthYear"></span>
+                    <button onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div class="calendar-weekdays">
+                    <span>Mo</span><span>Di</span><span>Mi</span><span>Do</span><span>Fr</span><span>Sa</span><span>So</span>
+                </div>
+                <div class="calendar-days" id="calendarDays"></div>
+            </div>
+            <div class="time-slots-container" id="timeSlotsContainer" style="display: none;">
+                <h3>Verfügbare Uhrzeiten</h3>
+                <div class="time-slots" id="timeSlots"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/chat.js"></script>
+</body>
+</html>

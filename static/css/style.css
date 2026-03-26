@@ -1,0 +1,810 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f0f2f5;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+/* ========== Landing Page ========== */
+.landing-page {
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 40%, #2563eb 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.landing-page::before {
+    content: '';
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);
+    top: -100px;
+    right: -100px;
+    border-radius: 50%;
+}
+
+.landing-page::after {
+    content: '';
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(99,102,241,0.1) 0%, transparent 70%);
+    bottom: -50px;
+    left: -50px;
+    border-radius: 50%;
+}
+
+.landing-content {
+    text-align: center;
+    color: white;
+    z-index: 1;
+}
+
+.landing-logo {
+    width: 120px;
+    height: 120px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 52px;
+    margin: 0 auto 32px;
+    color: #60a5fa;
+}
+
+.landing-content h1 {
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 10px;
+}
+
+.landing-content > p {
+    font-size: 20px;
+    opacity: 0.7;
+    font-weight: 300;
+}
+
+.landing-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 48px;
+    font-size: 16px;
+    opacity: 0.5;
+    animation: hintPulse 2s ease-in-out infinite;
+}
+
+@keyframes hintPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.7; }
+}
+
+/* ========== Chat Bubble ========== */
+.chat-bubble {
+    position: fixed;
+    bottom: 40px;
+    right: 40px;
+    z-index: 1000;
+    cursor: pointer;
+}
+
+.bubble-icon {
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    color: white;
+    box-shadow: 0 8px 32px rgba(37, 99, 235, 0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 2;
+}
+
+.bubble-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 40px rgba(37, 99, 235, 0.5);
+}
+
+.bubble-pulse {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(37, 99, 235, 0.3);
+    animation: pulse 2s ease-out infinite;
+    z-index: 1;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(1.8); opacity: 0; }
+}
+
+.bubble-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 26px;
+    height: 26px;
+    background: #ef4444;
+    color: white;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    border: 3px solid white;
+    animation: badgePop 0.3s ease;
+}
+
+.bubble-badge.hidden {
+    display: none;
+}
+
+@keyframes badgePop {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.chat-bubble.open .bubble-icon {
+    transform: rotate(0deg);
+}
+
+.chat-bubble.open .bubble-pulse {
+    display: none;
+}
+
+/* ========== Chat Widget — CENTERED & LARGE ========== */
+.chat-widget {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 90vw;
+    max-width: 900px;
+    height: 90vh;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 32px 100px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    z-index: 999;
+    overflow: hidden;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+.chat-widget.open {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* ========== Widget Header ========== */
+.widget-header {
+    background: linear-gradient(135deg, #1e3a5f, #2563eb);
+    padding: 22px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.widget-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.widget-avatar {
+    width: 54px;
+    height: 54px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+    position: relative;
+}
+
+.online-dot {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 16px;
+    height: 16px;
+    background: #22c55e;
+    border-radius: 50%;
+    border: 3px solid #1e3a5f;
+}
+
+.widget-header-info h2 {
+    color: white;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+}
+
+.widget-header-info p {
+    color: rgba(255,255,255,0.7);
+    font-size: 16px;
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.header-btn {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: white;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-btn:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+/* ========== Messages ========== */
+.widget-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    background: #f8fafc;
+    scroll-behavior: smooth;
+}
+
+.message {
+    max-width: 80%;
+    padding: 18px 24px;
+    font-size: 20px;
+    line-height: 1.7;
+    animation: msgIn 0.3s ease;
+}
+
+@keyframes msgIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.bot-message {
+    background: white;
+    color: #1e293b;
+    align-self: flex-start;
+    border-radius: 6px 20px 20px 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.user-message {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    align-self: flex-end;
+    border-radius: 20px 6px 20px 20px;
+}
+
+/* ========== Service Dropdown ========== */
+.service-dropdown-wrapper {
+    margin-top: 12px;
+}
+
+.service-dropdown {
+    width: 100%;
+    padding: 16px 18px;
+    font-size: 18px;
+    font-family: inherit;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    background: white;
+    color: #1e293b;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    transition: all 0.2s;
+    outline: none;
+}
+
+.service-dropdown:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.service-dropdown option {
+    padding: 12px;
+    font-size: 16px;
+}
+
+.service-confirm-btn {
+    margin-top: 12px;
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 18px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.service-confirm-btn:hover {
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+    transform: translateY(-1px);
+}
+
+.service-confirm-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ========== Booking Button ========== */
+.booking-trigger-btn {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    border: none;
+    padding: 16px 28px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 600;
+    font-family: inherit;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.booking-trigger-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+}
+
+.booking-trigger-btn:disabled {
+    transform: none;
+    box-shadow: none;
+    cursor: default;
+}
+
+/* ========== Input Area ========== */
+.widget-input {
+    padding: 20px 28px;
+    background: white;
+    border-top: 1px solid #e2e8f0;
+    flex-shrink: 0;
+}
+
+.input-wrapper {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    background: #f1f5f9;
+    border-radius: 18px;
+    padding: 6px 6px 6px 20px;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+}
+
+.input-wrapper:focus-within {
+    border-color: #2563eb;
+    background: white;
+}
+
+.input-wrapper input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 20px;
+    font-family: inherit;
+    outline: none;
+    color: #1e293b;
+    padding: 12px 0;
+}
+
+.input-wrapper input::placeholder {
+    color: #94a3b8;
+}
+
+.input-wrapper button {
+    width: 52px;
+    height: 52px;
+    border: none;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    border-radius: 14px;
+    cursor: pointer;
+    font-size: 20px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.input-wrapper button:hover {
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.input-footer {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 13px;
+    color: #94a3b8;
+}
+
+/* ========== Typing Indicator ========== */
+.typing-indicator {
+    display: flex;
+    gap: 6px;
+    padding: 18px 24px;
+    align-self: flex-start;
+    background: white;
+    border-radius: 6px 20px 20px 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.typing-indicator span {
+    width: 10px;
+    height: 10px;
+    background: #94a3b8;
+    border-radius: 50%;
+    animation: bounce 1.4s infinite;
+}
+
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-10px); }
+}
+
+/* ========== Calendar Modal — LARGE ========== */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    justify-content: center;
+    align-items: center;
+    z-index: 1100;
+    padding: 20px;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal {
+    background: white;
+    border-radius: 24px;
+    width: 100%;
+    max-width: 620px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 32px 100px rgba(0, 0, 0, 0.25);
+    animation: modalIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-header {
+    padding: 24px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-header h2 {
+    font-size: 22px;
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.modal-close {
+    background: #f1f5f9;
+    border: none;
+    font-size: 18px;
+    color: #64748b;
+    cursor: pointer;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+/* ========== Calendar ========== */
+.calendar-container {
+    padding: 28px 32px;
+}
+
+.calendar-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.calendar-nav span {
+    font-weight: 600;
+    font-size: 22px;
+    color: #1e293b;
+}
+
+.calendar-nav button {
+    background: #f1f5f9;
+    border: none;
+    border-radius: 12px;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    color: #64748b;
+    font-size: 16px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendar-nav button:hover {
+    background: #e2e8f0;
+    color: #2563eb;
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.calendar-weekdays span {
+    font-size: 16px;
+    font-weight: 600;
+    color: #94a3b8;
+    padding: 10px 0;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    background: none;
+    color: #1e293b;
+    font-family: inherit;
+    font-weight: 500;
+}
+
+.calendar-day:hover:not(.disabled):not(.empty) {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.calendar-day.today {
+    border: 2px solid #2563eb;
+    font-weight: 700;
+}
+
+.calendar-day.selected {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    font-weight: 700;
+}
+
+.calendar-day.disabled {
+    color: #cbd5e1;
+    cursor: not-allowed;
+}
+
+.calendar-day.empty {
+    cursor: default;
+}
+
+/* ========== Time Slots ========== */
+.time-slots-container {
+    padding: 0 32px 28px;
+}
+
+.time-slots-container h3 {
+    font-size: 18px;
+    color: #1e293b;
+    margin-bottom: 14px;
+    font-weight: 600;
+}
+
+.time-slots {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.time-slot {
+    padding: 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 500;
+    font-family: inherit;
+    transition: all 0.2s;
+    background: white;
+    color: #1e293b;
+}
+
+.time-slot:hover {
+    border-color: #2563eb;
+    background: #eff6ff;
+}
+
+.time-slot.selected {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    border-color: #2563eb;
+}
+
+/* ========== Confirmation ========== */
+.confirmation-card {
+    background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+    border: 2px solid #86efac;
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 10px;
+}
+
+.confirmation-card h3 {
+    color: #16a34a;
+    font-size: 18px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.confirmation-card p {
+    font-size: 16px;
+    color: #334155;
+    margin: 6px 0;
+    line-height: 1.6;
+}
+
+/* ========== Scrollbar ========== */
+.widget-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.widget-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.widget-messages::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.widget-messages::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 768px) {
+    .chat-bubble {
+        bottom: 24px;
+        right: 24px;
+    }
+
+    .chat-widget {
+        width: 100vw;
+        height: 100vh;
+        max-width: none;
+        border-radius: 0;
+    }
+
+    .landing-content h1 {
+        font-size: 28px;
+    }
+
+    .landing-logo {
+        width: 80px;
+        height: 80px;
+        font-size: 38px;
+    }
+
+    .time-slots {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .modal {
+        max-width: 100%;
+        border-radius: 16px;
+    }
+
+    .message {
+        font-size: 18px;
+    }
+}
