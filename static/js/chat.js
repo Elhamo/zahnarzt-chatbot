@@ -28,12 +28,10 @@ function toggleChat() {
 
     if (isOpen) {
         chatWidget.classList.remove("open");
-        chatBubble.classList.remove("open");
-        bubbleIcon.innerHTML = '<i class="fas fa-comments"></i>';
+        chatBubble.style.display = "";
     } else {
         chatWidget.classList.add("open");
-        chatBubble.classList.add("open");
-        bubbleIcon.innerHTML = '<i class="fas fa-times"></i>';
+        chatBubble.style.display = "none";
         bubbleBadge.classList.add("hidden");
 
         if (!chatOpened) {
