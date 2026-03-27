@@ -2,14 +2,50 @@ from flask import Flask, render_template, jsonify, request, session
 from datetime import datetime
 import anthropic
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+import json as json_lib
+import urllib.request
+import urllib.error
+
+
+def call_claude(system_prompt, messages):
+    """Call Claude API using urllib (works on Vercel serverless)."""
+    api_key = os.getenv("ANTHROPIC_API_KEY", "").strip()
+    url = "https://api.anthropic.com/v1/messages"
+    headers = {
+        "Content-Type": "application/json",
+        "x-api-key": api_key,
+        "anthropic-version": "2023-06-01",
+    }
+    payload = json_lib.dumps({
+        "model": "claude-haiku-4-5-20251001",
+        "max_tokens": 400,
+        "system": system_prompt,
+        "messages": messages,
+    }).encode("utf-8")
+
+    import time
+    for attempt in range(5):
+        try:
+            req = urllib.request.Request(url, data=payload, headers=headers, method="POST")
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                data = json_lib.loads(resp.read().decode("utf-8"))
+                return data["content"][0]["text"]
+        except urllib.error.HTTPError as e:
+            if e.code == 529 and attempt < 4:
+                time.sleep(2 * (attempt + 1))
+                continue
+            raise
 
 # Practice knowledge for the AI
 SYSTEM_PROMPT = """Du bist der freundliche KI-Assistent der Zahnarztpraxis Dr. Christian Schreiner in Wien.
@@ -204,6 +240,17 @@ def get_services():
     return jsonify(SERVICES)
 
 
+@app.route("/api/debug")
+def debug():
+    key = os.getenv("ANTHROPIC_API_KEY", "NOT SET")
+    masked = key[:12] + "..." if len(key) > 12 else key
+    try:
+        reply = call_claude("Antworte kurz auf Deutsch.", [{"role": "user", "content": "Hi"}])
+        return jsonify({"key": masked, "status": "OK", "reply": reply})
+    except Exception as e:
+        return jsonify({"key": masked, "status": "ERROR", "error": str(e), "type": type(e).__name__})
+
+
 @app.route("/api/chat", methods=["POST"])
 def chat():
     data = request.json
@@ -217,13 +264,7 @@ def chat():
     messages.append({"role": "user", "content": user_message})
 
     try:
-        response = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=300,
-            system=SYSTEM_PROMPT,
-            messages=messages,
-        )
-        reply = response.content[0].text
+        reply = call_claude(SYSTEM_PROMPT, messages)
 
         # Check if bot suggests booking
         show_booking = "[TERMIN_BUCHEN]" in reply
@@ -233,14 +274,20 @@ def chat():
             "reply": clean_reply,
             "show_booking": show_booking,
         })
-    except anthropic.AuthenticationError:
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", errors="replace")
+        if e.code == 401:
+            return jsonify({
+                "reply": "API-Key ist nicht konfiguriert oder ungültig.",
+                "show_booking": False,
+            })
         return jsonify({
-            "reply": "API-Key ist nicht konfiguriert. Bitte tragen Sie Ihren Anthropic API-Key in der .env Datei ein.",
+            "reply": f"API Fehler ({e.code}): {body}",
             "show_booking": False,
         })
     except Exception as e:
         return jsonify({
-            "reply": "Entschuldigung, es gab einen technischen Fehler. Bitte versuchen Sie es erneut.",
+            "reply": f"Fehler: {str(e)}",
             "show_booking": False,
         })
 
