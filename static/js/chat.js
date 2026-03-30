@@ -37,7 +37,7 @@ function toggleChat() {
         if (!chatOpened) {
             chatOpened = true;
             setTimeout(() => {
-                addBotMessage("Willkommen bei der Zahnarztpraxis Dr. Christian Schreiner! 😊");
+                addBotMessage("Willkommen bei der Zahnarztpraxis Dr. Max Mustermann! 😊");
                 setTimeout(() => {
                     addBotMessage("Ich bin Ihr KI-Assistent. Sie können mir Fragen stellen oder einen Termin buchen.\n\nWie kann ich Ihnen helfen?");
                 }, 600);
@@ -318,13 +318,21 @@ function handleBookingInput(value) {
     if (bookingStep === "enter_name") {
         window.patientName = value;
         setTimeout(() => {
-            addBotMessage("Und Ihre Telefonnummer bitte:");
+            addBotMessage("Ihre Telefonnummer bitte:");
             bookingStep = "enter_phone";
             userInput.placeholder = "Ihre Telefonnummer...";
             userInput.focus();
         }, 400);
     } else if (bookingStep === "enter_phone") {
         window.patientPhone = value;
+        setTimeout(() => {
+            addBotMessage("Ihre Versicherungsnummer bitte:");
+            bookingStep = "enter_versicherung";
+            userInput.placeholder = "Ihre Versicherungsnummer...";
+            userInput.focus();
+        }, 400);
+    } else if (bookingStep === "enter_versicherung") {
+        window.patientVersicherung = value;
         userInput.placeholder = "Schreiben Sie Ihre Nachricht...";
         setTimeout(() => bookAppointment(), 400);
     }
@@ -342,6 +350,7 @@ async function bookAppointment() {
         time: selectedTime,
         patient_name: window.patientName,
         phone: window.patientPhone,
+        versicherungsnummer: window.patientVersicherung,
     };
 
     try {
@@ -367,6 +376,7 @@ async function bookAppointment() {
                     <p><strong>Dauer:</strong> ca. ${selectedService.duration} Min.</p>
                     <p><strong>Name:</strong> ${window.patientName}</p>
                     <p><strong>Telefon:</strong> ${window.patientPhone}</p>
+                    <p><strong>Versicherungsnr.:</strong> ${window.patientVersicherung}</p>
                 </div>
             `;
             chatMessages.appendChild(card);
@@ -403,13 +413,14 @@ function resetChat() {
     bookingStep = null;
     window.patientName = "";
     window.patientPhone = "";
+    window.patientVersicherung = "";
 
     chatMessages.innerHTML = "";
     userInput.value = "";
     userInput.placeholder = "Schreiben Sie Ihre Nachricht...";
 
     setTimeout(() => {
-        addBotMessage("Willkommen bei der Zahnarztpraxis Dr. Christian Schreiner! 😊");
+        addBotMessage("Willkommen bei der Zahnarztpraxis Dr. Max Mustermann! 😊");
         setTimeout(() => {
             addBotMessage("Ich bin Ihr KI-Assistent. Sie können mir Fragen stellen oder einen Termin buchen.\n\nWie kann ich Ihnen helfen?");
         }, 600);

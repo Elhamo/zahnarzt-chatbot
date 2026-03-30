@@ -48,11 +48,11 @@ def call_claude(system_prompt, messages):
             raise
 
 # Practice knowledge for the AI
-SYSTEM_PROMPT = """Du bist der freundliche KI-Assistent der Zahnarztpraxis Dr. Christian Schreiner in Wien.
+SYSTEM_PROMPT = """Du bist der freundliche KI-Assistent der Zahnarztpraxis Dr. Max Mustermann in Wien.
 Du hilfst Patienten bei Fragen und bei der Terminbuchung.
 
 PRAXIS-INFORMATIONEN:
-- Arzt: Dr. Christian Schreiner
+- Arzt: Dr. Max Mustermann
 - Adresse: Wallnerstraße 4/6/2/39, 1010 Wien
 - Telefon: +43 1 533 221 9
 - Email: office@zahn-wien.at
@@ -210,21 +210,11 @@ REGELN:
 
 # Services list
 SERVICES = [
-    {"id": 1, "name": "Beratung", "desc": "Untersuchung und Besprechung", "duration": 30},
-    {"id": 2, "name": "Extraktion", "desc": "Extraktion inkl. Anästhesie", "duration": 45},
-    {"id": 3, "name": "Einflächenfüllung", "desc": "Einflächenfüllung im Seitzahnbereich", "duration": 45},
-    {"id": 4, "name": "Mehrflächenfüllung", "desc": "Drei- oder Mehrflächenfüllung im Seitzahnbereich", "duration": 60},
-    {"id": 5, "name": "Eckaufbau", "desc": "Eckaufbau/Schneidekante", "duration": 45},
-    {"id": 6, "name": "Wurzelbehandlung", "desc": "Wurzelbehandlung (3-kanalig)", "duration": 90},
-    {"id": 7, "name": "Zahnhälse", "desc": "Behandlung empfindlicher Zahnhälse", "duration": 30},
-    {"id": 8, "name": "Zahnsteinentfernung", "desc": "Zahnsteinentfernung", "duration": 30},
-    {"id": 9, "name": "Zahnröntgen", "desc": "Zahnröntgen", "duration": 15},
-    {"id": 10, "name": "Panoramaröntgen", "desc": "Panoramaröntgen", "duration": 20},
-    {"id": 11, "name": "Stomatitis", "desc": "Stomatitisbehandlung", "duration": 30},
-    {"id": 12, "name": "Operative Entfernung", "desc": "Operative Zahnentfernung", "duration": 60},
-    {"id": 13, "name": "Keramik-Inlay", "desc": "Keramik-Inlay mehrflächig", "duration": 60},
-    {"id": 14, "name": "Vollkeramik Krone", "desc": "Vollkeramik Krone", "duration": 90},
-    {"id": 15, "name": "Mundhygiene", "desc": "Mundhygiene", "duration": 60},
+    {"id": 1, "name": "Erste Kontrolle", "desc": "Erstuntersuchung und Beratung", "duration": 30},
+    {"id": 2, "name": "Zahnentfernung", "desc": "Extraktion inkl. Anästhesie", "duration": 45},
+    {"id": 3, "name": "Wurzelbehandlung", "desc": "Wurzelbehandlung (3-kanalig)", "duration": 90},
+    {"id": 4, "name": "Füllung", "desc": "Zahnfüllung", "duration": 45},
+    {"id": 5, "name": "Mundhygiene", "desc": "Professionelle Zahnreinigung", "duration": 60},
 ]
 
 appointments = []
@@ -303,6 +293,7 @@ def book_appointment():
         "time": data["time"],
         "patient_name": data["patient_name"],
         "phone": data.get("phone", ""),
+        "versicherungsnummer": data.get("versicherungsnummer", ""),
         "booked_at": datetime.now().isoformat(),
     }
     appointments.append(appointment)
