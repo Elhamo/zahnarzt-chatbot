@@ -92,7 +92,10 @@ async function sendUserInput() {
 
         addBotMessage(data.reply);
 
-        if (data.show_booking) {
+        if (data.direct_service) {
+            // AI recognized a specific service — book directly
+            startDirectBooking(data.direct_service);
+        } else if (data.show_booking) {
             showBookingButton();
         }
     } catch (err) {
@@ -116,7 +119,7 @@ function showBookingButton() {
     scrollToBottom();
 }
 
-// Start booking flow
+// Start booking flow (with dropdown)
 function startBooking() {
     bookingMode = true;
     bookingStep = "select_service";
@@ -128,6 +131,40 @@ function startBooking() {
 
     addBotMessage("Bitte wählen Sie eine Behandlung:");
     loadServices();
+}
+
+// Direct booking — AI already identified the service
+async function startDirectBooking(serviceName) {
+    bookingMode = true;
+
+    // Load services if not loaded yet
+    if (services.length === 0) {
+        try {
+            const res = await fetch("/api/services");
+            services = await res.json();
+        } catch (err) {
+            addBotMessage("Fehler beim Laden der Behandlungen.");
+            return;
+        }
+    }
+
+    // Find matching service
+    const match = services.find(s =>
+        s.name.toLowerCase() === serviceName.toLowerCase()
+    );
+
+    if (match) {
+        selectedService = match;
+        addUserMessage(match.name);
+        setTimeout(() => {
+            addBotMessage(`"${match.name}" gewählt. Bitte wählen Sie Ihren Wunschtermin.`);
+            setTimeout(() => openCalendar(), 600);
+        }, 400);
+    } else {
+        // No exact match — fall back to dropdown
+        addBotMessage("Bitte wählen Sie eine Behandlung:");
+        loadServices();
+    }
 }
 
 // Service dropdown

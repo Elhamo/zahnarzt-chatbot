@@ -201,11 +201,17 @@ REGELN:
 - Antworte immer auf Deutsch
 - Sei freundlich, professionell und hilfsbereit
 - Halte die Antworten kurz und klar (max 2-3 Sätze, bei Preisfragen darf es mehr sein)
-- Wenn der Patient einen Termin buchen möchte, frage nach der gewünschten Behandlung und sage ihm, er soll auf den Button "Termin buchen" klicken
 - Wenn nach Preisen gefragt wird, nenne die oben angegebenen Preise und Selbstbehalte. Frage ggf. nach der Krankenkasse des Patienten, um den genauen Selbstbehalt nennen zu können
 - Wenn du etwas nicht weißt, sage ehrlich dass du es nicht weißt und empfehle den Kontakt zur Praxis
 - Erfinde KEINE Preise oder Informationen die nicht oben stehen
-- Wenn der Patient einen Termin buchen möchte, antworte mit dem speziellen Tag: [TERMIN_BUCHEN] am Ende deiner Nachricht
+
+TERMINBUCHUNG:
+Wenn der Patient einen Termin buchen möchte, verwende einen speziellen Tag am Ende deiner Nachricht:
+- Wenn der Patient BEREITS eine bestimmte Behandlung genannt hat (z.B. "Termin für Mundhygiene", "Ich brauche eine Füllung", "Kontrolle bitte"), dann verwende: [TERMIN:ServiceName]
+  Dabei muss ServiceName GENAU einer der folgenden sein: Erste Kontrolle, Zahnentfernung, Wurzelbehandlung, Füllung, Mundhygiene
+  Beispiele: [TERMIN:Mundhygiene] oder [TERMIN:Erste Kontrolle] oder [TERMIN:Füllung]
+- Wenn der Patient nur allgemein einen Termin möchte OHNE eine Behandlung zu nennen, dann verwende: [TERMIN_BUCHEN]
+  Dann wird dem Patienten eine Auswahl angezeigt.
 """
 
 # Services list
@@ -256,13 +262,24 @@ def chat():
     try:
         reply = call_claude(SYSTEM_PROMPT, messages)
 
-        # Check if bot suggests booking
+        # Check if bot suggests booking with specific service
+        import re
+        direct_match = re.search(r'\[TERMIN:(.+?)\]', reply)
         show_booking = "[TERMIN_BUCHEN]" in reply
-        clean_reply = reply.replace("[TERMIN_BUCHEN]", "").strip()
+        direct_service = None
+
+        if direct_match:
+            direct_service = direct_match.group(1).strip()
+            clean_reply = re.sub(r'\[TERMIN:.+?\]', '', reply).strip()
+        elif show_booking:
+            clean_reply = reply.replace("[TERMIN_BUCHEN]", "").strip()
+        else:
+            clean_reply = reply
 
         return jsonify({
             "reply": clean_reply,
             "show_booking": show_booking,
+            "direct_service": direct_service,
         })
     except urllib.error.HTTPError as e:
         body = e.read().decode("utf-8", errors="replace")
