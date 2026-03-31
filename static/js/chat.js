@@ -167,54 +167,31 @@ async function startDirectBooking(serviceName) {
     }
 }
 
-// Service dropdown
+// Service selection with buttons
 function showServiceSelection() {
     const container = document.createElement("div");
     container.className = "message bot-message";
 
     const wrapper = document.createElement("div");
-    wrapper.className = "service-dropdown-wrapper";
-
-    const select = document.createElement("select");
-    select.className = "service-dropdown";
-    select.id = "serviceSelect";
-
-    const defaultOpt = document.createElement("option");
-    defaultOpt.value = "";
-    defaultOpt.textContent = "— Behandlung auswählen —";
-    defaultOpt.disabled = true;
-    defaultOpt.selected = true;
-    select.appendChild(defaultOpt);
+    wrapper.className = "service-buttons-wrapper";
 
     services.forEach(service => {
-        const opt = document.createElement("option");
-        opt.value = service.id;
-        opt.textContent = `${service.name} — ${service.desc} (ca. ${service.duration} Min.)`;
-        select.appendChild(opt);
+        const btn = document.createElement("button");
+        btn.className = "service-btn";
+        btn.innerHTML = `<span class="service-btn-name">${service.name}</span><span class="service-btn-desc">${service.desc} (ca. ${service.duration} Min.)</span>`;
+        btn.onclick = () => {
+            // Disable all service buttons after selection
+            wrapper.querySelectorAll(".service-btn").forEach(b => {
+                b.disabled = true;
+                b.style.opacity = "0.5";
+            });
+            btn.style.opacity = "1";
+            btn.classList.add("selected");
+            selectService(service);
+        };
+        wrapper.appendChild(btn);
     });
 
-    const confirmBtn = document.createElement("button");
-    confirmBtn.className = "service-confirm-btn";
-    confirmBtn.innerHTML = '<i class="fas fa-check"></i> Auswahl bestätigen';
-    confirmBtn.disabled = true;
-
-    select.onchange = () => {
-        confirmBtn.disabled = false;
-    };
-
-    confirmBtn.onclick = () => {
-        const selectedId = parseInt(select.value);
-        const service = services.find(s => s.id === selectedId);
-        if (service) {
-            select.disabled = true;
-            confirmBtn.disabled = true;
-            confirmBtn.style.opacity = "0.5";
-            selectService(service);
-        }
-    };
-
-    wrapper.appendChild(select);
-    wrapper.appendChild(confirmBtn);
     container.appendChild(wrapper);
     chatMessages.appendChild(container);
     scrollToBottom();
@@ -335,6 +312,8 @@ function selectTime(time) {
     document.querySelectorAll(".time-slot").forEach(btn => {
         btn.classList.toggle("selected", btn.textContent === time);
     });
+
+    if (!selectedDate) return;
 
     setTimeout(() => {
         closeCalendar();

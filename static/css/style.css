@@ -332,69 +332,62 @@ body {
     border-radius: 20px 6px 20px 20px;
 }
 
-/* ========== Service Dropdown ========== */
-.service-dropdown-wrapper {
+/* ========== Service Buttons ========== */
+.service-buttons-wrapper {
     margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.service-dropdown {
+.service-btn {
     width: 100%;
     padding: 16px 18px;
-    font-size: 18px;
     font-family: inherit;
     border: 2px solid #e2e8f0;
     border-radius: 14px;
     background: white;
     color: #1e293b;
     cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 16px center;
     transition: all 0.2s;
     outline: none;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
-.service-dropdown:focus {
+.service-btn:hover {
     border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    background: #eff6ff;
 }
 
-.service-dropdown option {
-    padding: 12px;
-    font-size: 16px;
-}
-
-.service-confirm-btn {
-    margin-top: 12px;
-    width: 100%;
-    padding: 16px;
+.service-btn.selected {
+    border-color: #2563eb;
     background: linear-gradient(135deg, #2563eb, #1d4ed8);
     color: white;
-    border: none;
-    border-radius: 14px;
+}
+
+.service-btn.selected .service-btn-desc {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.service-btn:disabled {
+    cursor: default;
+}
+
+.service-btn:disabled:not(.selected) {
+    opacity: 0.5;
+}
+
+.service-btn-name {
     font-size: 18px;
     font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
 }
 
-.service-confirm-btn:hover {
-    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
-    transform: translateY(-1px);
-}
-
-.service-confirm-btn:disabled {
-    opacity: 0.5;
-    cursor: default;
-    transform: none;
-    box-shadow: none;
+.service-btn-desc {
+    font-size: 14px;
+    color: #64748b;
 }
 
 /* ========== Booking Button ========== */
@@ -914,13 +907,15 @@ body {
         font-size: 15px;
     }
 
-    .service-dropdown {
+    .service-btn-name {
         font-size: 16px;
-        padding: 14px;
     }
 
-    .service-confirm-btn {
-        font-size: 16px;
+    .service-btn-desc {
+        font-size: 13px;
+    }
+
+    .service-btn {
         padding: 14px;
     }
 
