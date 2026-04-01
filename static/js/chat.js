@@ -155,10 +155,10 @@ async function startDirectBooking(serviceName) {
 
     if (match) {
         selectedService = match;
+        bookingStep = "confirm_booking";
         addUserMessage(match.name);
         setTimeout(() => {
-            addBotMessage(`"${match.name}" gewählt. Bitte wählen Sie Ihren Wunschtermin.`);
-            setTimeout(() => openCalendar(), 600);
+            addBotMessage(`"${match.name}" gewählt. Möchten Sie jetzt einen Termin buchen? (Ja/Nein)`);
         }, 400);
     } else {
         // No exact match — fall back to dropdown
@@ -199,11 +199,11 @@ function showServiceSelection() {
 
 function selectService(service) {
     selectedService = service;
+    bookingStep = "confirm_booking";
     addUserMessage(service.name);
 
     setTimeout(() => {
-        addBotMessage(`"${service.name}" gewählt. Bitte wählen Sie Ihren Wunschtermin.`);
-        setTimeout(() => openCalendar(), 600);
+        addBotMessage(`"${service.name}" gewählt. Möchten Sie jetzt einen Termin buchen? (Ja/Nein)`);
     }, 400);
 }
 
@@ -329,8 +329,91 @@ function selectTime(time) {
     }, 300);
 }
 
-// Booking input
-function handleBookingInput(value) {
+// Detect if input is a question instead of expected data
+function isLikelyQuestion(text) {
+    const lower = text.toLowerCase().trim();
+    if (lower.includes("?")) return true;
+    const starts = [
+        "was ", "wie ", "wo ", "wann ", "warum ", "welch", "wieviel", "wieso ",
+        "können ", "kann ich", "kann man", "gibt es", "ist das", "ist die", "ist der",
+        "haben sie", "hat die", "muss ich", "soll ich", "brauche ich", "kostet",
+        "how ", "what ", "when ", "where ", "why ", "which ", "can ", "do ", "does ", "is "
+    ];
+    return starts.some(q => lower.startsWith(q));
+}
+
+function isConfirmation(text) {
+    const lower = text.toLowerCase().trim().replace(/[!.,]+$/, "");
+    const words = ["ja", "yes", "ok", "okay", "jo", "klar", "sicher", "gerne",
+        "ja bitte", "ja gerne", "jawohl", "genau", "passt", "machen wir",
+        "bitte", "jap", "yep", "yeah", "sure", "auf jeden fall"];
+    return words.some(w => lower === w || lower.startsWith(w + " "));
+}
+
+function isDenial(text) {
+    const lower = text.toLowerCase().trim().replace(/[!.,]+$/, "");
+    const words = ["nein", "no", "nee", "nö", "lieber nicht", "doch nicht",
+        "abbrechen", "cancel", "stop", "nicht"];
+    return words.some(w => lower === w || lower.startsWith(w + " "));
+}
+
+function getReAskMessage() {
+    if (bookingStep === "confirm_booking") return `Möchten Sie den Termin für "${selectedService.name}" buchen? (Ja/Nein)`;
+    if (bookingStep === "enter_name") return "Bitte geben Sie Ihren Namen ein:";
+    if (bookingStep === "enter_phone") return "Ihre Telefonnummer bitte:";
+    if (bookingStep === "enter_versicherung") return "Ihre Versicherungsnummer bitte:";
+    return "Wie kann ich Ihnen helfen?";
+}
+
+async function answerQuestionDuringBooking(question) {
+    showTyping();
+    try {
+        const res = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: question, history: chatHistory }),
+        });
+        const data = await res.json();
+        removeTyping();
+
+        chatHistory.push({ role: "user", content: question });
+        chatHistory.push({ role: "assistant", content: data.reply });
+
+        addBotMessage(data.reply);
+    } catch (err) {
+        removeTyping();
+        addBotMessage("Entschuldigung, Verbindungsfehler.");
+    }
+
+    // Re-ask the booking question
+    const reAsk = getReAskMessage();
+    setTimeout(() => addBotMessage(reAsk), 600);
+}
+
+// Booking input with validation
+async function handleBookingInput(value) {
+    // Confirmation step — user must say Ja/Nein before calendar opens
+    if (bookingStep === "confirm_booking") {
+        if (isConfirmation(value)) {
+            setTimeout(() => openCalendar(), 400);
+        } else if (isDenial(value)) {
+            bookingMode = false;
+            bookingStep = null;
+            selectedService = null;
+            userInput.placeholder = "Schreiben Sie Ihre Nachricht...";
+            setTimeout(() => addBotMessage("Kein Problem! Kann ich Ihnen bei etwas anderem helfen?"), 400);
+        } else {
+            await answerQuestionDuringBooking(value);
+        }
+        return;
+    }
+
+    // Detect questions during data entry
+    if (isLikelyQuestion(value)) {
+        await answerQuestionDuringBooking(value);
+        return;
+    }
+
     if (bookingStep === "enter_name") {
         window.patientName = value;
         setTimeout(() => {
@@ -340,6 +423,11 @@ function handleBookingInput(value) {
             userInput.focus();
         }, 400);
     } else if (bookingStep === "enter_phone") {
+        // If no digits at all, probably not a phone number
+        if (!/\d/.test(value)) {
+            await answerQuestionDuringBooking(value);
+            return;
+        }
         window.patientPhone = value;
         setTimeout(() => {
             addBotMessage("Ihre Versicherungsnummer bitte:");
